@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Linq;
@@ -7,22 +8,23 @@ using VirusTracker.Models;
 
 namespace VirusTracker.Controllers
 {
-    public class BusinessesController : Controller
+    public class TrackersController : Controller
     {
         private readonly TracingContext _context;
 
-        public BusinessesController(TracingContext context)
+        public TrackersController(TracingContext context)
         {
             _context = context;
         }
 
-        // GET: Businesses
+        // GET: Trackers
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Business.ToListAsync());
+            var tracingContext = _context.Tracker.Include(t => t.BusinessIdfkNavigation);
+            return View(await tracingContext.ToListAsync());
         }
 
-        // GET: Businesses/Details/5
+        // GET: Trackers/Details/5
         public async Task<IActionResult> Details(Guid? id)
         {
             if (id == null)
@@ -30,40 +32,47 @@ namespace VirusTracker.Controllers
                 return NotFound();
             }
 
-            var business = await _context.Business
+            var tracker = await _context.Tracker
+                .Include(t => t.BusinessIdfkNavigation)
                 .FirstOrDefaultAsync(m => m.Id == id);
-            if (business == null)
+            if (tracker == null)
             {
                 return NotFound();
             }
 
-            return View(business);
+            return View(tracker);
         }
 
-        // GET: Businesses/Create
+        // GET: Trackers/Create
         public IActionResult Create()
         {
+            ViewData["BusinessIdfk"] = new SelectList(_context.Business, "Id", "AdminName");
             return View();
         }
 
-        // POST: Businesses/Create
+        // POST: Trackers/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to, for 
         // more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,BusinessName,AdminName,BusinessAddress,Phone")] Models.Business business)
+        public async Task<IActionResult> Create([Bind("Id,BusinessIdfk,Name,Phone")] Tracker tracker)
         {
             if (ModelState.IsValid)
             {
-                business.Id = Guid.NewGuid();
-                _context.Add(business);
+                DateTime localDate = DateTime.Now;
+                tracker.DateIn = localDate.ToLocalTime();
+                tracker.DateOut = localDate.ToLocalTime();
+
+                tracker.Id = Guid.NewGuid();
+                _context.Add(tracker);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            return View(business);
+            ViewData["BusinessIdfk"] = new SelectList(_context.Business, "Id", "AdminName", tracker.BusinessIdfk);
+            return View(tracker);
         }
 
-        // GET: Businesses/Edit/5
+        // GET: Trackers/Edit/5
         public async Task<IActionResult> Edit(Guid? id)
         {
             if (id == null)
@@ -71,22 +80,23 @@ namespace VirusTracker.Controllers
                 return NotFound();
             }
 
-            var business = await _context.Business.FindAsync(id);
-            if (business == null)
+            var tracker = await _context.Tracker.FindAsync(id);
+            if (tracker == null)
             {
                 return NotFound();
             }
-            return View(business);
+            ViewData["BusinessIdfk"] = new SelectList(_context.Business, "Id", "AdminName", tracker.BusinessIdfk);
+            return View(tracker);
         }
 
-        // POST: Businesses/Edit/5
+        // POST: Trackers/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to, for 
         // more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(Guid id, [Bind("Id,BusinessName,AdminName,BusinessAddress,Phone")] Models.Business business)
+        public async Task<IActionResult> Edit(Guid id, [Bind("Id,BusinessIdfk,Name,Phone,DateIn,DateOut")] Tracker tracker)
         {
-            if (id != business.Id)
+            if (id != tracker.Id)
             {
                 return NotFound();
             }
@@ -95,12 +105,12 @@ namespace VirusTracker.Controllers
             {
                 try
                 {
-                    _context.Update(business);
+                    _context.Update(tracker);
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!BusinessExists(business.Id))
+                    if (!TrackerExists(tracker.Id))
                     {
                         return NotFound();
                     }
@@ -111,10 +121,11 @@ namespace VirusTracker.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            return View(business);
+            ViewData["BusinessIdfk"] = new SelectList(_context.Business, "Id", "AdminName", tracker.BusinessIdfk);
+            return View(tracker);
         }
 
-        // GET: Businesses/Delete/5
+        // GET: Trackers/Delete/5
         public async Task<IActionResult> Delete(Guid? id)
         {
             if (id == null)
@@ -122,30 +133,31 @@ namespace VirusTracker.Controllers
                 return NotFound();
             }
 
-            var business = await _context.Business
+            var tracker = await _context.Tracker
+                .Include(t => t.BusinessIdfkNavigation)
                 .FirstOrDefaultAsync(m => m.Id == id);
-            if (business == null)
+            if (tracker == null)
             {
                 return NotFound();
             }
 
-            return View(business);
+            return View(tracker);
         }
 
-        // POST: Businesses/Delete/5
+        // POST: Trackers/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(Guid id)
         {
-            var business = await _context.Business.FindAsync(id);
-            _context.Business.Remove(business);
+            var tracker = await _context.Tracker.FindAsync(id);
+            _context.Tracker.Remove(tracker);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
-        private bool BusinessExists(Guid id)
+        private bool TrackerExists(Guid id)
         {
-            return _context.Business.Any(e => e.Id == id);
+            return _context.Tracker.Any(e => e.Id == id);
         }
     }
 }

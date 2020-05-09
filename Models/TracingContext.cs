@@ -21,7 +21,7 @@ namespace VirusTracker.Models
             if (!optionsBuilder.IsConfigured)
             {
                 //#warning To protect potentially sensitive information in your connection string, you should move it out of source code. See http://go.microsoft.com/fwlink/?LinkId=723263 for guidance on storing connection strings.
-                optionsBuilder.UseSqlServer("Data Source=GARYLAPTOP\\SQLEXPRESS01;Initial Catalog=ContactTracing;Integrated Security=True;Connect Timeout=30;Encrypt=False;TrustServerCertificate=False;ApplicationIntent=ReadWrite;MultiSubnetFailover=False");
+                optionsBuilder.UseSqlServer(@"Data Source=GARYLAPTOP\\SQLEXPRESS01;Initial Catalog=ContactTracing;Integrated Security=True;Connect Timeout=30;Encrypt=False;TrustServerCertificate=False;ApplicationIntent=ReadWrite;MultiSubnetFailover=False");
             }
         }
 
@@ -34,7 +34,8 @@ namespace VirusTracker.Models
 
             modelBuilder.Entity<Tracker>(entity =>
             {
-                entity.HasNoKey();
+                // entity.HasNoKey();
+                entity.Property(d => d.Id).HasDefaultValueSql("(newid())");
 
                 entity.HasOne(d => d.BusinessIdfkNavigation)
                     .WithMany()
