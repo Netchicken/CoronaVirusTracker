@@ -1,7 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using Newtonsoft.Json;
+using System;
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace VirusTracker.Models
 {
@@ -9,6 +8,8 @@ namespace VirusTracker.Models
     {
         [Key]
         public Guid Id { get; set; }
+        [Required]
+        public Guid ASPNetUsersIdfk { get; set; }
         [Required]
         [StringLength(50)]
         public string BusinessName { get; set; }
@@ -21,5 +22,7 @@ namespace VirusTracker.Models
         [Required]
         [StringLength(50)]
         public string Phone { get; set; }
+
+
     }
 }

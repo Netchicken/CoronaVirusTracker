@@ -37,10 +37,10 @@ namespace VirusTracker.Models
                 // entity.HasNoKey();
                 entity.Property(d => d.Id).HasDefaultValueSql("(newid())");
 
-                entity.HasOne(d => d.BusinessIdfkNavigation)
-                    .WithMany()
-                    .HasForeignKey(d => d.BusinessIdfk)
-                    .HasConstraintName("FK_Tracker_Business");
+                /* entity.HasOne(d => d.BusinessIdfkNavigation)
+                     .WithMany()
+                     .HasForeignKey(d => d.BusinessIdfk)
+                     .HasConstraintName("FK_Tracker_Business");*/
             });
 
             OnModelCreatingPartial(modelBuilder);
