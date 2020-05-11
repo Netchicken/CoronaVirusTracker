@@ -1,0 +1,8 @@
+﻿
+https://stackoverflow.com/questions/14517798/append-values-to-query-string
+
+QueryHelpers.AddQueryString(longurl, "action", "login1")
+QueryHelpers.AddQueryString(longurl, new Dictionary<string, string> { { "action", "login1" }, { "attempts", "11" } });
+
+
+

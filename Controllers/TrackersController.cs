@@ -1,6 +1,9 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
+﻿using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -10,18 +13,28 @@ namespace VirusTracker.Controllers
 {
     public class TrackersController : Controller
     {
+        private readonly ILogger<TrackersController> _logger;
+        private readonly IWebHostEnvironment _env;
+        private IHttpContextAccessor _httpacc;
         private readonly TracingContext _context;
+        private readonly UserManager<ApplicationUser> _userManager;
 
-        public TrackersController(TracingContext context)
+        public TrackersController(TracingContext context, ILogger<TrackersController> logger,
+            IWebHostEnvironment env,
+            IHttpContextAccessor httpacc,
+             UserManager<ApplicationUser> userManager)
         {
             _context = context;
+            _logger = logger;
+            _env = env;
+            _httpacc = httpacc;
+            _userManager = userManager;
         }
 
         // GET: Trackers
         public async Task<IActionResult> Index()
         {
-            var tracingContext = _context.Tracker.Include(t => t.BusinessIdfkNavigation);
-            return View(await tracingContext.ToListAsync());
+            return View(await _context.Tracker.ToListAsync());
         }
 
         // GET: Trackers/Details/5
@@ -33,7 +46,6 @@ namespace VirusTracker.Controllers
             }
 
             var tracker = await _context.Tracker
-                .Include(t => t.BusinessIdfkNavigation)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (tracker == null)
             {
@@ -46,7 +58,6 @@ namespace VirusTracker.Controllers
         // GET: Trackers/Create
         public IActionResult Create()
         {
-            ViewData["BusinessIdfk"] = new SelectList(_context.Business, "Id", "AdminName");
             return View();
         }
 
@@ -55,20 +66,34 @@ namespace VirusTracker.Controllers
         // more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,BusinessIdfk,Name,Phone")] Tracker tracker)
+        public async Task<IActionResult> Create([Bind("Id,BusinessName,Name,Phone,DateIn,DateOut")] Tracker tracker)
         {
             if (ModelState.IsValid)
             {
-                DateTime localDate = DateTime.Now;
-                tracker.DateIn = localDate.ToLocalTime();
-                tracker.DateOut = localDate.ToLocalTime();
+
+                //    https://stackoverflow.com/questions/30701006/how-to-get-the-current-logged-in-user-id-in-asp-net-core
+                /*   ApplicationUser applicationUser = await _userManager.GetUserAsync(User);
+                   string userEmail = applicationUser?.Email; // will give the user's Email
+                   Guid userId = Guid.Parse(applicationUser?.Id); // will give the user's Email
+   */
+                //var userId = _userManager.FindFirstValue(ClaimTypes.NameIdentifier); // will give the user's userId
+                //  var userName = _userManager.FindFirstValue(ClaimTypes.Name); // will give the user's userName
+
+
+
+
+                //get the absolute URL 
+                string BusinessName = _httpacc.HttpContext.Request.Host.Value;
+
+                //todo get the name from the host get the guid from the name, add to tracker
 
                 tracker.Id = Guid.NewGuid();
+                //   tracker.ASPNetUsersIdfk = BusinessName;
+                // tracker.BusinessName = BusinessName
                 _context.Add(tracker);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["BusinessIdfk"] = new SelectList(_context.Business, "Id", "AdminName", tracker.BusinessIdfk);
             return View(tracker);
         }
 
@@ -85,7 +110,6 @@ namespace VirusTracker.Controllers
             {
                 return NotFound();
             }
-            ViewData["BusinessIdfk"] = new SelectList(_context.Business, "Id", "AdminName", tracker.BusinessIdfk);
             return View(tracker);
         }
 
@@ -94,7 +118,7 @@ namespace VirusTracker.Controllers
         // more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(Guid id, [Bind("Id,BusinessIdfk,Name,Phone,DateIn,DateOut")] Tracker tracker)
+        public async Task<IActionResult> Edit(Guid id, [Bind("Id,ASPNetUsersIdfk, BusinessName,Name,Phone,DateIn,DateOut")] Tracker tracker)
         {
             if (id != tracker.Id)
             {
@@ -121,7 +145,6 @@ namespace VirusTracker.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["BusinessIdfk"] = new SelectList(_context.Business, "Id", "AdminName", tracker.BusinessIdfk);
             return View(tracker);
         }
 
@@ -134,7 +157,6 @@ namespace VirusTracker.Controllers
             }
 
             var tracker = await _context.Tracker
-                .Include(t => t.BusinessIdfkNavigation)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (tracker == null)
             {

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Linq;
@@ -10,10 +11,12 @@ namespace VirusTracker.Controllers
     public class BusinessesController : Controller
     {
         private readonly TracingContext _context;
+        private readonly UserManager<ApplicationUser> _userManager;
 
-        public BusinessesController(TracingContext context)
+        public BusinessesController(TracingContext context, UserManager<ApplicationUser> userManager)
         {
             _context = context;
+            _userManager = userManager;
         }
 
         // GET: Businesses
@@ -53,9 +56,26 @@ namespace VirusTracker.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id,BusinessName,AdminName,BusinessAddress,Phone")] Models.Business business)
         {
+
+            //todo add in the guid of the current logged in person to the class
+
+
+
+
             if (ModelState.IsValid)
             {
+                //    https://stackoverflow.com/questions/30701006/how-to-get-the-current-logged-in-user-id-in-asp-net-core
+                ApplicationUser applicationUser = await _userManager.GetUserAsync(User);
+                string userEmail = applicationUser?.Email; // will give the user's Email
+                Guid userId = Guid.Parse(applicationUser?.Id); // will give the user's Email
+
+
+                //var userId = _userManager.FindFirstValue(ClaimTypes.NameIdentifier); // will give the user's userId
+                //  var userName = _userManager.FindFirstValue(ClaimTypes.Name); // will give the user's userName
+
+
                 business.Id = Guid.NewGuid();
+                business.ASPNetUsersIdfk = userId;
                 _context.Add(business);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
