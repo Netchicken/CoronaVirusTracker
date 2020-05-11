@@ -2,8 +2,11 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System;
+using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using VirusTracker.Business;
 using VirusTracker.Models;
 
 namespace VirusTracker.Controllers
@@ -18,6 +21,27 @@ namespace VirusTracker.Controllers
             _context = context;
             _userManager = userManager;
         }
+
+        public async Task<IActionResult> QRCode()
+        {
+            //https://www.c-sharpcorner.com/article/generate-qr-code-in-net-core-using-bitmap/
+            QRCodeCreation QR = new QRCodeCreation();
+            //todo pass in the url of the business
+            Bitmap qrCodeImage = QR.QRGenerate("");
+
+
+            return View(BitmapToBytesCode(qrCodeImage));
+        }
+        [NonAction]
+        private static Byte[] BitmapToBytesCode(Bitmap image)
+        {
+            using (MemoryStream stream = new MemoryStream())
+            {
+                image.Save(stream, System.Drawing.Imaging.ImageFormat.Png);
+                return stream.ToArray();
+            }
+        }
+
 
         // GET: Businesses
         public async Task<IActionResult> Index()
