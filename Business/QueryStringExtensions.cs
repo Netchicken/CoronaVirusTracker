@@ -8,15 +8,16 @@ namespace VirusTracker.Business
 
 
     public static class QueryStringExtensions
-    {
-        public static string AddToQueryString(this string url, params object[] keysAndValues)
+    {   // params object[] keysAndValues
+        public static string AddToQueryString(this string url, string key, string value)
         {
+            //only need 1 not an array
             return UpdateQueryString(url, q =>
             {
-                for (var i = 0; i < keysAndValues.Length; i += 2)
-                {
-                    q.Set(keysAndValues[i].ToString(), keysAndValues[i + 1].ToString());
-                }
+                //for (var i = 0; i < keysAndValues.Length; i += 2)
+                //{
+                q.Set(key, value);
+                //  }
             });
         }
 

@@ -16,19 +16,34 @@ namespace VirusTracker.Controllers
         private readonly TracingContext _context;
         private readonly UserManager<ApplicationUser> _userManager;
 
-        public BusinessesController(TracingContext context, UserManager<ApplicationUser> userManager)
+        public BusinessesController(
+            TracingContext context,
+            UserManager<ApplicationUser> userManager
+            )
         {
             _context = context;
             _userManager = userManager;
         }
 
-        public async Task<IActionResult> QRCode()
+        public async Task<IActionResult> QRCode(Guid? id)
         {
             //https://www.c-sharpcorner.com/article/generate-qr-code-in-net-core-using-bitmap/
             QRCodeCreation QR = new QRCodeCreation();
-            //todo pass in the url of the business
-            Bitmap qrCodeImage = QR.QRGenerate("");
+            //todo pass in the url of the business  
 
+            Models.Business business = _context.Business.FirstOrDefault(m => m.Id == id);
+
+            //grab the business, replace any spaces
+            string place = business.BusinessName.Replace(" ", "_");
+
+            //todo replace localhost with actual url
+            //https://stackoverflow.com/questions/38437005/how-to-get-current-url-in-view-in-asp-net-core-1-0
+            var location = new Uri($"{Request.Scheme}://{Request.Host}{Request.Path}");
+            var url = location.AbsoluteUri;
+
+            string path = QueryStringExtensions.AddToQueryString(url, "Place", place);
+
+            Bitmap qrCodeImage = QR.QRGenerate(path);
 
             return View(BitmapToBytesCode(qrCodeImage));
         }
@@ -80,17 +95,13 @@ namespace VirusTracker.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id,BusinessName,AdminName,BusinessAddress,Phone")] Models.Business business)
         {
-
             //todo add in the guid of the current logged in person to the class
-
-
-
 
             if (ModelState.IsValid)
             {
                 //    https://stackoverflow.com/questions/30701006/how-to-get-the-current-logged-in-user-id-in-asp-net-core
                 ApplicationUser applicationUser = await _userManager.GetUserAsync(User);
-                string userEmail = applicationUser?.Email; // will give the user's Email
+                //   string userEmail = applicationUser?.Email; // will give the user's Email
                 Guid userId = Guid.Parse(applicationUser?.Id); // will give the user's Email
 
 

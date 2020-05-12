@@ -31,10 +31,15 @@ namespace VirusTracker
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(
                     Configuration.GetConnectionString("TrackingDB")));
+
             services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
+ .AddRoles<IdentityRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>();
 
 
+
+
+            //    services.AddHttpContextAccessor();
             services.AddControllersWithViews();
             services.AddRazorPages();
         }
