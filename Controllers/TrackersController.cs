@@ -161,21 +161,60 @@ namespace VirusTracker.Controllers
             HttpContext.Session.SetString("LoginDetails", JsonConvert.SerializeObject(logoutDetails));
 
 
-
-            return View("LogoutTracker");
+            return View(LogoutTracker(tracker.Id));  // View("LogoutTracker");
         }
 
 
         // GET: Trackers/LogoutTracker
-        public IActionResult LogoutTracker()
+        public async Task<IActionResult> LogoutTracker(Guid id)
         {
             //get user info from session
 
-            var LoginDetails = JsonConvert.DeserializeObject<LogoutTrackerModel>(HttpContext.Session.GetString("LoginDetails"));
+            //  var LoginDetails = JsonConvert.DeserializeObject<LogoutTrackerModel>(HttpContext.Session.GetString("LoginDetails"));
+            if (id == null)
+            {
+                return NotFound();
+            }
 
+            var tracker = await _context.Tracker.FindAsync(id);
+            if (tracker == null)
+            {
+                return NotFound();
+            }
+            return View(tracker);
+        }
 
+        // GET: Trackers/LogoutTracker
+        public async Task<IActionResult> LogoutTracker(Guid id, [Bind("Id,ASPNetUsersIdfk, BusinessName,Name,Phone,DateIn,DateOut")] Tracker tracker)
+        {
 
-            return View();
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    tracker.DateOut = DateTime.Now;
+                    _context.Update(tracker);
+                    await _context.SaveChangesAsync();
+                }
+                catch (DbUpdateConcurrencyException)
+                {
+                    if (!TrackerExists(tracker.Id))
+                    {
+                        return NotFound();
+                    }
+                    else
+                    {
+                        throw;
+                    }
+                }
+                return RedirectToAction(nameof(Index));
+            }
+            return View(tracker);
         }
 
 

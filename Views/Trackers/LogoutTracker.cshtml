@@ -1,22 +1,25 @@
-﻿@model IndexModel
+﻿@*@model IndexModel*@
 
-<h1>Logout</h1>
+@{string place = ViewData["Place"].ToString();
+
+    place = place.Replace("_", " "); }
+
+
+<h1>Logout from @place</h1>
 <hr />
 <div class="row">
     <div class="col-md-4">
-        <form asp-action="Create">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-
+        <form asp-action="LogoutTracker">
             <div class="form-group">
-                <input type="submit" value="LogOut" class="btn btn-primary" />
+                <input type="submit" value="Log me out" class="btn btn-primary" />
             </div>
         </form>
     </div>
 </div>
 
 @*<div>
-    <a asp-action="Index">Back to List</a>
-</div>*@
+        <a asp-action="Index">Back to List</a>
+    </div>*@
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
