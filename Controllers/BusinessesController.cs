@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Drawing;
@@ -14,16 +13,21 @@ namespace VirusTracker.Controllers
     public class BusinessesController : Controller
     {
         private readonly TracingContext _context;
-        private readonly UserManager<ApplicationUser> _userManager;
+        //   private readonly UserManager<ApplicationUser> _userManager;
+
+
+        //  Guid CurrentGuid;
 
         public BusinessesController(
-            TracingContext context,
-            UserManager<ApplicationUser> userManager
+            TracingContext context
+            //      UserManager<ApplicationUser> userManager
             )
         {
             _context = context;
-            _userManager = userManager;
+            //      _userManager = userManager;
         }
+
+
 
         public async Task<IActionResult> QRCode(Guid? id)
         {
@@ -37,24 +41,27 @@ namespace VirusTracker.Controllers
             string place = business.BusinessName.Replace(" ", "_");
 
             //todo replace localhost with actual url
-            //https://stackoverflow.com/questions/38437005/how-to-get-current-url-in-view-in-asp-net-core-1-0
-            var location = new Uri($"{Request.Scheme}://{Request.Host}{Request.Path}");
+            //https://stackoverflow.com/questions/38437005/how-to-get-current-url-in-view-in-asp-net-core-1-0   
+            //https://weblog.west-wind.com/posts/2020/Mar/13/Back-to-Basics-Rewriting-a-URL-in-ASPNET-Core {Request.Path}
+            var location = new Uri($"{Request.Scheme}://{Request.Host}/Trackers/Create");
             var url = location.AbsoluteUri;
 
-            string path = QueryStringExtensions.AddToQueryString(url, "Place", place);
 
+            //https://localhost:44394/Trackers/Create?Place=Vision_College
+
+            string path = QueryStringExtensions.AddToQueryString(url, "Place", place);
+            ViewData["CodePlace"] = path;
             Bitmap qrCodeImage = QR.QRGenerate(path);
 
             return View(BitmapToBytesCode(qrCodeImage));
         }
+
         [NonAction]
         private static Byte[] BitmapToBytesCode(Bitmap image)
         {
-            using (MemoryStream stream = new MemoryStream())
-            {
-                image.Save(stream, System.Drawing.Imaging.ImageFormat.Png);
-                return stream.ToArray();
-            }
+            using MemoryStream stream = new MemoryStream();
+            image.Save(stream, System.Drawing.Imaging.ImageFormat.Png);
+            return stream.ToArray();
         }
 
 
@@ -100,17 +107,23 @@ namespace VirusTracker.Controllers
             if (ModelState.IsValid)
             {
                 //    https://stackoverflow.com/questions/30701006/how-to-get-the-current-logged-in-user-id-in-asp-net-core
-                ApplicationUser applicationUser = await _userManager.GetUserAsync(User);
+
+                //todo Fix usermanager
+                //    ApplicationUser applicationUser = await _userManager.GetUserAsync(User);
+
+
+
                 //   string userEmail = applicationUser?.Email; // will give the user's Email
-                Guid userId = Guid.Parse(applicationUser?.Id); // will give the user's Email
+                //todo Fix usermanager
+                //   Guid userId = Guid.Parse(applicationUser?.Id); // will give the user's Email
 
 
                 //var userId = _userManager.FindFirstValue(ClaimTypes.NameIdentifier); // will give the user's userId
                 //  var userName = _userManager.FindFirstValue(ClaimTypes.Name); // will give the user's userName
 
-
+                business.BusinessName = business.BusinessName.Replace(" ", "_"); //clear out spaces
                 business.Id = Guid.NewGuid();
-                business.ASPNetUsersIdfk = userId;
+                //   business.ASPNetUsersIdfk = userId;//todo Fix usermanager
                 _context.Add(business);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));

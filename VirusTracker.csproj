@@ -5,6 +5,10 @@
     <UserSecretsId>aspnet-VirusTracker-253FEDA4-8633-4B0C-AA34-31A5444FF350</UserSecretsId>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Content Remove="Views\Trackers\LogoutTracker.cshtml" />
+  </ItemGroup>
+
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="3.1.3" />
@@ -28,6 +32,11 @@
 
   <ItemGroup>
     <Folder Include="ViewModels\" />
+  </ItemGroup>
+
+
+  <ItemGroup>
+    <None Include="Views\Trackers\LogoutTracker.cshtml" />
   </ItemGroup>
 
 </Project>

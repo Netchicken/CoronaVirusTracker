@@ -1,9 +1,11 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Mvc;
+using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace VirusTracker.Models
 {
+    [BindProperties] //to tell model binding to target all public properties of the class:(SupportsGet = true)
     public partial class Tracker
     {
 
@@ -11,7 +13,8 @@ namespace VirusTracker.Models
         public Guid Id { get; set; }
         [Required]
         public string ASPNetUsersIdfk { get; set; }
-        [Required]
+
+
         public string BusinessName { get; set; }
         [Required]
         [StringLength(50)]
@@ -24,6 +27,8 @@ namespace VirusTracker.Models
         [Column(TypeName = "datetime")]
         public DateTime DateOut { get; set; }
 
+        /*   [FromQuery(Name = "Place")]  //populates it from the query */
+        public string Place { get; set; }
 
     }
 }

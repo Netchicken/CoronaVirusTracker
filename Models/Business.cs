@@ -23,6 +23,5 @@ namespace VirusTracker.Models
         [StringLength(50)]
         public string Phone { get; set; }
 
-
     }
 }

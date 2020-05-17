@@ -2,7 +2,13 @@
 
 @{ ViewData["Title"] = "Create"; }
 
-<h1>Create a Contact</h1>
+@{string place = ViewData["Place"].ToString();
+
+    place = place.Replace("_", " "); }
+
+
+
+<h2> Create a Contact for @place </h2>
 <hr />
 <div class="row">
     <div class="col-md-4">
@@ -18,24 +24,32 @@
                 <input asp-for="Name" class="form-control" />
                 <span asp-validation-for="Name" class="text-danger"></span>
             </div>
+
             <div class="form-group">
                 <label asp-for="Phone" class="control-label"></label>
                 <input asp-for="Phone" class="form-control" />
                 <span asp-validation-for="Phone" class="text-danger"></span>
-                @*  </div>
-                    <div class="form-group">
-                        <label asp-for="DateIn" class="control-label"></label>
-                        <input asp-for="DateIn" class="form-control" />
-                        <span asp-validation-for="DateIn" class="text-danger"></span>
-                    </div>
-                    <div class="form-group">
-                        <label asp-for="DateOut" class="control-label"></label>
-                        <input asp-for="DateOut" class="form-control" />
-                        <span asp-validation-for="DateOut" class="text-danger"></span>
-                    </div>*@
-                <div class="form-group">
-                    <input type="submit" value="Create" class="btn btn-primary" />
+            </div>
+            <div class="form-group">
+                <label asp-for="Place" class="control-label"></label>
+                <input asp-for="Place" class="form-control" value="@ViewData["Place"]" />
+                <span asp-validation-for="Place" class="text-danger"></span>
+            </div>
+
+
+            @*     <div class="form-group">
+                    <label asp-for="DateIn" class="control-label"></label>
+                    <input asp-for="DateIn" class="form-control" />
+                    <span asp-validation-for="DateIn" class="text-danger"></span>
                 </div>
+                <div class="form-group">
+                    <label asp-for="DateOut" class="control-label"></label>
+                    <input asp-for="DateOut" class="form-control" />
+                    <span asp-validation-for="DateOut" class="text-danger"></span>
+                </div>*@
+            <div class="form-group">
+                <input type="submit" value="Create" class="btn btn-primary" />
+            </div>
         </form>
     </div>
 </div>

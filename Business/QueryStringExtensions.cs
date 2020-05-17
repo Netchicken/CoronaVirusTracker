@@ -9,7 +9,7 @@ namespace VirusTracker.Business
 
     public static class QueryStringExtensions
     {   // params object[] keysAndValues
-        public static string AddToQueryString(this string url, string key, string value)
+        public static string AddToQueryString(string url, string key, string value)
         {
             //only need 1 not an array
             return UpdateQueryString(url, q =>
