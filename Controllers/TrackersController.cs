@@ -161,22 +161,19 @@ namespace VirusTracker.Controllers
             HttpContext.Session.SetString("LoginDetails", JsonConvert.SerializeObject(logoutDetails));
 
 
-            return View(LogoutTracker(tracker.Id));  // View("LogoutTracker");
+            return View(LogoutTracker(tracker));  // View("LogoutTracker");
         }
 
 
         // GET: Trackers/LogoutTracker
-        public async Task<IActionResult> LogoutTracker(Guid id)
+        public async Task<IActionResult> LogoutTracker(Tracker tracker)
         {
             //get user info from session
 
             //  var LoginDetails = JsonConvert.DeserializeObject<LogoutTrackerModel>(HttpContext.Session.GetString("LoginDetails"));
-            if (id == null)
-            {
-                return NotFound();
-            }
 
-            var tracker = await _context.Tracker.FindAsync(id);
+
+            //   var tracker = await _context.Tracker.FindAsync(tracker.id);
             if (tracker == null)
             {
                 return NotFound();
