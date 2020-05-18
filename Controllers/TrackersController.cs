@@ -8,12 +8,16 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 using VirusTracker.Models;
+using VirusTracker.Services;
 
 namespace VirusTracker.Controllers
 {
 
     public class TrackersController : Controller
     {
+        private const string c_CONTRIVEDCOOKIENAME = "contrived";
+        private const string c_NAMECOOKIENAME = "basicname";
+        private readonly ICookieService _cookieService;
 
 
         public string Place { get; set; }
@@ -27,7 +31,8 @@ namespace VirusTracker.Controllers
 
         public TrackersController(TracingContext context, ILogger<TrackersController> logger,
             IWebHostEnvironment env,
-              IHttpContextAccessor httpacc
+              IHttpContextAccessor httpacc,
+              ICookieService cookieService
        //      UserManager<ApplicationUser> userManager
        )
         {
@@ -35,6 +40,7 @@ namespace VirusTracker.Controllers
             _logger = logger;
             _env = env;
             _httpacc = httpacc;
+            _cookieService = cookieService;
             //  _userManager = userManager;
         }
 
@@ -82,6 +88,9 @@ namespace VirusTracker.Controllers
 
 
 
+
+
+
             return View();
         }
 
@@ -93,26 +102,25 @@ namespace VirusTracker.Controllers
         public async Task<IActionResult> Create([Bind("Name, Phone, Place")] Tracker tracker)
         {
 
-            //  tracker.BusinessName = Place;
-            // string BusinessName = HttpContext.Request.Query["Place"].ToString();
-            // string BusinessNameQuery = BusinessName;
-            if (HttpContext.Request.Path.HasValue)
-            {
+            //https://localhost:44394/Trackers/Create?Place=Vision_College
 
-                //https://localhost:44394/Trackers/Create?Place=Vision_College
-
-                //todo process the query part to get the guid of the business class.
-                //seems to get just the query part which is all I need anyway
-                //   string stuff = UriHelper.GetEncodedPathAndQuery(Request);  //returns trackers/create
-                //  string url = HttpContext.Request.Path;  //returns trackers/create
-                //get out the business name at the end of the url
+            //todo process the query part to get the guid of the business class.
+            //seems to get just the query part which is all I need anyway
+            //   string stuff = UriHelper.GetEncodedPathAndQuery(Request);  //returns trackers/create
+            //  string url = HttpContext.Request.Path;  //returns trackers/create
+            //get out the business name at the end of the url
 
 
-                // BusinessName = url.Contains('?') ? url.Substring(url.IndexOf('=')) : null;
-            }
+            // BusinessName = url.Contains('?') ? url.Substring(url.IndexOf('=')) : null;
+            //}
 
             //get the absolute URL 
             //  BusinessName = BusinessName;    //_httpacc.HttpContext.Request.Host.Value;
+
+            //read cookie from Request object  
+            string cookieValueFromReq = Request.Cookies["LoginDetails"];
+
+
             Models.Business data = _context.Business.FirstOrDefault(m => m.BusinessName == tracker.Place);
             Guid aSPNetUsersIdfk = data.ASPNetUsersIdfk;
             tracker.ASPNetUsersIdfk = aSPNetUsersIdfk.ToString();
@@ -120,34 +128,10 @@ namespace VirusTracker.Controllers
             tracker.DateIn = DateTime.Now;
             tracker.DateOut = DateTime.Now;
 
-            //  tracker.BusinessName = BusinessName;
-
-
-            //     if (ModelState.IsValid)
-            //    {
-
-            //    https://stackoverflow.com/questions/30701006/how-to-get-the-current-logged-in-user-id-in-asp-net-core
-            /*   ApplicationUser applicationUser = await _userManager.GetUserAsync(User);
-               string userEmail = applicationUser?.Email; // will give the user's Email
-               Guid userId = Guid.Parse(applicationUser?.Id); // will give the user's Email
-*/
-            //var userId = _userManager.FindFirstValue(ClaimTypes.NameIdentifier); // will give the user's userId
-            //  var userName = _userManager.FindFirstValue(ClaimTypes.Name); // will give the user's userName
-
-
-
             _context.Add(tracker);
             await _context.SaveChangesAsync();
             //      return RedirectToAction(nameof(Index));
             //  }
-
-            //todo I need 2 cookies, one holds the ID of the entry ad can be removed after some hours. The other holds the Name and phone and never expires.
-
-            //this session cookie
-            //  CookieOptions cookieID = new CookieOptions();
-            // cookieID.Expires = DateTime.Now.AddHours(10); //kill it after 10 hours
-
-            //  _context.Response.Cookies.Append("key", "value", cookieID);//adds a cookie to the HTTP response and sets the name of the new cookie to "key" and its value to "value".
 
 
             //set user info into session

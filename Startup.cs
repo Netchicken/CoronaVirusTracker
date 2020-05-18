@@ -1,13 +1,16 @@
 ﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System;
+using VirusTracker.Business;
 using VirusTracker.Data;
 using VirusTracker.Models;
+using VirusTracker.Services;
 
 namespace VirusTracker
 {
@@ -57,6 +60,9 @@ namespace VirusTracker
                 options.User.RequireUniqueEmail = false;
             });
 
+
+            services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+            services.AddScoped<ICookieService, CookieService>();
             services.ConfigureApplicationCookie(options =>
             {
                 // Cookie settings
@@ -81,13 +87,13 @@ namespace VirusTracker
        options.Cookie.Name = ".LogoutTracker";
    });*/
 
-            services.AddSession(options =>
-            {
-                options.IdleTimeout = TimeSpan.FromSeconds(10);  // sets a short timeout to simplify testing. determine how long a session can be idle before its contents in the server's cache are abandoned. This property is independent of the cookie expiration. 
-                options.Cookie.HttpOnly = true;
-                options.Cookie.IsEssential = true;
-                options.Cookie.Name = ".LoginDetails";
-            });
+            /* services.AddSession(options =>
+             {
+                 options.IdleTimeout = TimeSpan.FromSeconds(10);  // sets a short timeout to simplify testing. determine how long a session can be idle before its contents in the server's cache are abandoned. This property is independent of the cookie expiration. 
+                 options.Cookie.HttpOnly = true;
+                 options.Cookie.IsEssential = true;
+                 options.Cookie.Name = ".LoginDetails";
+             });*/
 
 
 
@@ -115,6 +121,8 @@ namespace VirusTracker
             }
             app.UseHttpsRedirection();
             app.UseStaticFiles();
+
+            app.UseCookieService();
 
             app.UseRouting();
 
