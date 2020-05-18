@@ -2,13 +2,22 @@
 
 @{ ViewData["Title"] = "Create"; }
 
-@{string place = ViewData["Place"].ToString();
 
-    place = place.Replace("_", " "); }
+@if (!string.IsNullOrEmpty(ViewData["Place"].ToString()))
+{
+
+    string place = ViewData["Place"].ToString();
+    place = place.Replace("_", " ");
+<h2> Create a Contact for @place </h2> }
+else
+{
+<h2> Create a Contact for The wrong place </h2>}
 
 
 
-<h2> Create a Contact for @place </h2>
+
+
+
 <hr />
 <div class="row">
     <div class="col-md-4">
@@ -21,13 +30,13 @@
                 </div>*@
             <div class="form-group">
                 <label asp-for="Name" class="control-label"></label>
-                <input asp-for="Name" class="form-control" />
+                <input asp-for="Name" class="form-control" value="@ViewData["cookieName"]" />
                 <span asp-validation-for="Name" class="text-danger"></span>
             </div>
 
             <div class="form-group">
                 <label asp-for="Phone" class="control-label"></label>
-                <input asp-for="Phone" class="form-control" />
+                <input asp-for="Phone" class="form-control" value="@ViewData["cookiePhone"]" />
                 <span asp-validation-for="Phone" class="text-danger"></span>
             </div>
             <div class="form-group">

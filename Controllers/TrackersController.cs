@@ -9,14 +9,16 @@ using System.Linq;
 using System.Threading.Tasks;
 using VirusTracker.Models;
 using VirusTracker.Services;
+using VirusTracker.ViewModels;
+using static VirusTracker.ViewModels.TrackerCookiesVM;
 
 namespace VirusTracker.Controllers
 {
 
     public class TrackersController : Controller
     {
-        private const string c_CONTRIVEDCOOKIENAME = "contrived";
-        private const string c_NAMECOOKIENAME = "basicname";
+        private const string c_CONTRIVEDCOOKIENAME = "TrackingCookieAndDetails";
+        private const string c_NAMECOOKIENAME = "TrackingCookie";
         private readonly ICookieService _cookieService;
 
 
@@ -86,9 +88,31 @@ namespace VirusTracker.Controllers
 
             }
 
+            //get the cookies back
+            var name = _cookieService.Get<string>(c_NAMECOOKIENAME);  //sample
+            var contrived = _cookieService.Get<ContrivedValues>(c_CONTRIVEDCOOKIENAME);  //sample
 
+            //  var contrived = _cookieService.GetOrSet<ContrivedValues>(c_CONTRIVEDCOOKIENAME, () => new ContrivedValues { Name = "n", Phone = "p", Place = Place });
 
+            if (contrived != null)
+            {
+                var viewModel = new TrackerCookiesVM
+                {
+                    Name = name,
+                    Contrived = contrived
+                };
 
+                ViewData["cookieName"] = viewModel.Contrived.Name;
+                ViewData["cookiePhone"] = viewModel.Contrived.Phone;
+                ViewData["cookiePlace"] = viewModel.Contrived.Place;
+            }
+            else
+            {
+                ViewData["cookieName"] = "";
+                ViewData["cookiePhone"] = "";
+                ViewData["cookiePlace"] = "";
+
+            }
 
 
             return View();
@@ -101,6 +125,12 @@ namespace VirusTracker.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Name, Phone, Place")] Tracker tracker)
         {
+            var request = new string[] { tracker.Name, tracker.Phone, tracker.Place };
+
+
+            _cookieService.Set(c_NAMECOOKIENAME, tracker.Name);
+            _cookieService.Set(c_CONTRIVEDCOOKIENAME, tracker);
+
 
             //https://localhost:44394/Trackers/Create?Place=Vision_College
 
@@ -110,12 +140,6 @@ namespace VirusTracker.Controllers
             //  string url = HttpContext.Request.Path;  //returns trackers/create
             //get out the business name at the end of the url
 
-
-            // BusinessName = url.Contains('?') ? url.Substring(url.IndexOf('=')) : null;
-            //}
-
-            //get the absolute URL 
-            //  BusinessName = BusinessName;    //_httpacc.HttpContext.Request.Host.Value;
 
             //read cookie from Request object  
             string cookieValueFromReq = Request.Cookies["LoginDetails"];
@@ -144,8 +168,8 @@ namespace VirusTracker.Controllers
             logoutDetails.Phone = tracker.Phone;
             HttpContext.Session.SetString("LoginDetails", JsonConvert.SerializeObject(logoutDetails));
 
-
-            return View(LogoutTracker(tracker));  // View("LogoutTracker");
+            return RedirectToAction(nameof(Index));// return View(tracker);
+            //  return View(LogoutTracker(tracker));  // View("LogoutTracker");
         }
 
 

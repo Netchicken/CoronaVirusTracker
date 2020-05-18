@@ -26,6 +26,19 @@ namespace VirusTracker
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+
+            services.Configure<CookiePolicyOptions>(options =>
+            {
+                // This lambda determines whether user consent for non-essential cookies is needed for a given request.
+                options.CheckConsentNeeded = context => true;
+                options.MinimumSameSitePolicy = SameSiteMode.None;
+            });
+
+            services.AddScoped<ICookieService, CookieService>();
+            services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+            services.AddSession();
+
+
             services.AddDbContext<TracingContext>(options =>
             options.UseSqlServer(
                 Configuration.GetConnectionString("TrackingDB"))
@@ -61,8 +74,6 @@ namespace VirusTracker
             });
 
 
-            services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
-            services.AddScoped<ICookieService, CookieService>();
             services.ConfigureApplicationCookie(options =>
             {
                 // Cookie settings
@@ -74,33 +85,9 @@ namespace VirusTracker
                 options.SlidingExpiration = true;
             });
 
-            //creating a session for holding cookies in memory
-            //https://docs.microsoft.com/en-us/aspnet/core/fundamentals/app-state?view=aspnetcore-3.1
-            //The following code shows how to set up the in-memory session provider with a default in-memory implementation of IDistributedCache:
+
             services.AddDistributedMemoryCache();
 
-            /*   services.AddSession(options =>
-   {
-       options.IdleTimeout = TimeSpan.FromSeconds(10);  // sets a short timeout to simplify testing. determine how long a session can be idle before its contents in the server's cache are abandoned. This property is independent of the cookie expiration. 
-       options.Cookie.HttpOnly = true;
-       options.Cookie.IsEssential = true;
-       options.Cookie.Name = ".LogoutTracker";
-   });*/
-
-            /* services.AddSession(options =>
-             {
-                 options.IdleTimeout = TimeSpan.FromSeconds(10);  // sets a short timeout to simplify testing. determine how long a session can be idle before its contents in the server's cache are abandoned. This property is independent of the cookie expiration. 
-                 options.Cookie.HttpOnly = true;
-                 options.Cookie.IsEssential = true;
-                 options.Cookie.Name = ".LoginDetails";
-             });*/
-
-
-
-            //Session uses a cookie to track and identify requests from a single browser. By default, this cookie is named .AspNetCore.Session, and it uses a path of /. Because the cookie default doesn't specify a domain, it isn't made available to the client-side script on the page (because HttpOnly defaults to true).
-            // Session state is accessed from a Razor Pages PageModel class or MVC Controller class with HttpContext.Session.This property is an ISession implementation.
-
-            //    services.AddHttpContextAccessor();
             services.AddControllersWithViews();
             services.AddRazorPages();
         }
@@ -119,6 +106,7 @@ namespace VirusTracker
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
+            app.UseSession();
             app.UseHttpsRedirection();
             app.UseStaticFiles();
 

@@ -31,11 +31,6 @@
 
 
   <ItemGroup>
-    <Folder Include="ViewModels\" />
-  </ItemGroup>
-
-
-  <ItemGroup>
     <None Include="Views\Trackers\LogoutTracker.cshtml" />
   </ItemGroup>
 
