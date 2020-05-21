@@ -21,18 +21,20 @@ namespace VirusTracker.Business
         {
             // write cookies to response right before it starts writing out from MVC/api responses...
             context.Response.OnStarting(() =>
-            {
-                // cookie service should not write out cookies on 500, possibly others as well
-                if (!context.Response.StatusCode.IsInRange(500, 599))
-                {
-                    cookieService.WriteToResponse(context);
-                }
-                return Task.CompletedTask;
-            });
+               {
+                   // cookie service should not write out cookies on 500, possibly others as well
+                   if (!context.Response.StatusCode.IsInRange(500, 599))
+                   {
+                       cookieService.WriteToResponse(context);
+                   }
+                   return Task.CompletedTask;
+               });
 
             await _next(context);
         }
     }
+    //InvalidOperationException: The model item passed into the ViewDataDictionary is of type 'System.String', but this ViewDataDictionary instance requires a model item of type 'System.Collections.Generic.IEnumerable`1[VirusTracker.Models.Tracker]'.
+
     //IsInRange Another thing to note is that I detect when the response is starting and then check to see if the status code is not within a certain range. If it is outside that range then we go ahead and write our cookies out to the response via the service. The IsInRange extension method is one I’ve added so, without further ado, here is a basic IntExtensions.cs I added to the project:
     public static class IntExtensions
     {

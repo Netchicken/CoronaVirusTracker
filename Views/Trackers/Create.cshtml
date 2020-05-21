@@ -3,15 +3,15 @@
 @{ ViewData["Title"] = "Create"; }
 
 
-@if (!string.IsNullOrEmpty(ViewData["Place"].ToString()))
+@try
 {
-
     string place = ViewData["Place"].ToString();
     place = place.Replace("_", " ");
 <h2> Create a Contact for @place </h2> }
-else
-{
-<h2> Create a Contact for The wrong place </h2>}
+catch (Exception)
+{<h2> Create a Contact for the wrong place </h2>}
+
+
 
 
 
@@ -61,9 +61,7 @@ else
             </div>
         </form>
     </div>
-</div>
-
-@*<div>
+</div> @*<div>
         <a asp-action="Index">Back to List</a>
     </div>*@
 

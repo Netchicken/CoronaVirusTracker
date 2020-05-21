@@ -97,8 +97,8 @@ namespace VirusTracker.Services
             {
                 Secure = _httpContext.Request.IsHttps
             };
-            if (expiry.HasValue)
-                options.Expires = expiry.Value;
+            /*   if (expiry.HasValue)*/
+            options.Expires = DateTime.MaxValue;    //expiry.Value;
 
             if (!_pendingCookies.TryGetValue(cookieName, out CachedCookie cookie))
                 cookie = Add(cookieName);

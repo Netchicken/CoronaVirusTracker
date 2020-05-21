@@ -116,7 +116,7 @@ namespace VirusTracker
 
             app.UseAuthentication();
             app.UseAuthorization();
-            app.UseSession();
+
 
             //https://weblog.west-wind.com/posts/2020/Mar/13/Back-to-Basics-Rewriting-a-URL-in-ASPNET-Core
             /*app.Use(async (context, next) =>

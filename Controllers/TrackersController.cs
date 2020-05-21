@@ -3,14 +3,12 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
 using VirusTracker.Models;
 using VirusTracker.Services;
 using VirusTracker.ViewModels;
-using static VirusTracker.ViewModels.TrackerCookiesVM;
 
 namespace VirusTracker.Controllers
 {
@@ -18,6 +16,7 @@ namespace VirusTracker.Controllers
     public class TrackersController : Controller
     {
         private const string c_CONTRIVEDCOOKIENAME = "TrackingCookieAndDetails";
+        private const string c_TrackingCookieWithID = "TrackingCookieWithID";
         private const string c_NAMECOOKIENAME = "TrackingCookie";
         private readonly ICookieService _cookieService;
 
@@ -97,7 +96,7 @@ namespace VirusTracker.Controllers
             if (contrived != null)
             {
                 var viewModel = new TrackerCookiesVM
-                {
+                {//2 classes
                     Name = name,
                     Contrived = contrived
                 };
@@ -108,7 +107,7 @@ namespace VirusTracker.Controllers
             }
             else
             {
-                ViewData["cookieName"] = "";
+                ViewData["cookieName"] = "Name";
                 ViewData["cookiePhone"] = "";
                 ViewData["cookiePlace"] = "";
 
@@ -125,24 +124,8 @@ namespace VirusTracker.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Name, Phone, Place")] Tracker tracker)
         {
-            var request = new string[] { tracker.Name, tracker.Phone, tracker.Place };
-
-
-            _cookieService.Set(c_NAMECOOKIENAME, tracker.Name);
-            _cookieService.Set(c_CONTRIVEDCOOKIENAME, tracker);
-
 
             //https://localhost:44394/Trackers/Create?Place=Vision_College
-
-            //todo process the query part to get the guid of the business class.
-            //seems to get just the query part which is all I need anyway
-            //   string stuff = UriHelper.GetEncodedPathAndQuery(Request);  //returns trackers/create
-            //  string url = HttpContext.Request.Path;  //returns trackers/create
-            //get out the business name at the end of the url
-
-
-            //read cookie from Request object  
-            string cookieValueFromReq = Request.Cookies["LoginDetails"];
 
 
             Models.Business data = _context.Business.FirstOrDefault(m => m.BusinessName == tracker.Place);
@@ -150,46 +133,74 @@ namespace VirusTracker.Controllers
             tracker.ASPNetUsersIdfk = aSPNetUsersIdfk.ToString();
             tracker.Id = Guid.NewGuid();
             tracker.DateIn = DateTime.Now;
-            tracker.DateOut = DateTime.Now;
+            tracker.DateOut = DateTime.Now.AddHours(2); //incase they forget to log out
+            SaveCookies(tracker);
+
 
             _context.Add(tracker);
             await _context.SaveChangesAsync();
-            //      return RedirectToAction(nameof(Index));
-            //  }
 
 
-            //set user info into session
-            LogoutTrackerModel logoutDetails = new LogoutTrackerModel();
 
-            //    var data = _context.Tracker.FirstOrDefaultAsync(m => m.Name == tracker.Name);
+            //pass through the model.  https://docs.microsoft.com/en-us/aspnet/core/mvc/views/overview?view=aspnetcore-3.1
+            return View("LogoutTracker", tracker);
 
-            logoutDetails.ID = tracker.Id.ToString();
-            logoutDetails.Name = tracker.Name;
-            logoutDetails.Phone = tracker.Phone;
-            HttpContext.Session.SetString("LoginDetails", JsonConvert.SerializeObject(logoutDetails));
+            //  return View();
 
-            return RedirectToAction(nameof(Index));// return View(tracker);
-            //  return View(LogoutTracker(tracker));  // View("LogoutTracker");
         }
 
-
-        // GET: Trackers/LogoutTracker
-        public async Task<IActionResult> LogoutTracker(Tracker tracker)
+        private void SaveCookies(Tracker tracker)
         {
-            //get user info from session
-
-            //  var LoginDetails = JsonConvert.DeserializeObject<LogoutTrackerModel>(HttpContext.Session.GetString("LoginDetails"));
-
-
-            //   var tracker = await _context.Tracker.FindAsync(tracker.id);
-            if (tracker == null)
+            var contrived = new ContrivedValues
             {
-                return NotFound();
-            }
-            return View(tracker);
+                Id = tracker.Id,
+                Name = tracker.Name,
+                Phone = tracker.Phone,
+                Place = tracker.Place
+
+            };
+
+            //set the cookies
+            //  var request = new string[] {tracker.Id, tracker.Name, tracker.Phone, tracker.Place };
+            _cookieService.Set(c_NAMECOOKIENAME, tracker.Name);
+            _cookieService.Set(c_CONTRIVEDCOOKIENAME, contrived);
         }
 
+        #region Session data not being used at present
+        //set user info into session
+        // LogoutTrackerModel logoutDetails = new LogoutTrackerModel();
+
+        //    var data = _context.Tracker.FirstOrDefaultAsync(m => m.Name == tracker.Name);
+
+        /*  logoutDetails.ID = tracker.Id.ToString();
+          logoutDetails.Name = tracker.Name;
+          logoutDetails.Phone = tracker.Phone;*/
+        // HttpContext.Session.SetString("LoginDetails", JsonConvert.SerializeObject(logoutDetails));
+        #endregion
+
+
         // GET: Trackers/LogoutTracker
+        [HttpGet()]
+        public IActionResult LogoutTracker()
+        {
+            //get the cookie
+            var contrived = _cookieService.Get<ContrivedValues>(c_CONTRIVEDCOOKIENAME);
+
+            var viewModel = new TrackerCookiesVM
+            { Contrived = contrived };
+
+            ViewData["cookieName"] = viewModel.Contrived.Name;
+            ViewData["cookiePhone"] = viewModel.Contrived.Phone;
+            ViewData["cookiePlace"] = viewModel.Contrived.Place;
+            ViewData["Id"] = viewModel.Contrived.Id;
+            return View();
+        }
+
+
+
+        // GET: Trackers/LogoutTracker
+        [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> LogoutTracker(Guid id, [Bind("Id,ASPNetUsersIdfk, BusinessName,Name,Phone,DateIn,DateOut")] Tracker tracker)
         {
 
@@ -219,7 +230,7 @@ namespace VirusTracker.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            return View(tracker);
+            return View();
         }
 
 
