@@ -48,7 +48,7 @@ namespace VirusTracker.Controllers
         // GET: Trackers
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Tracker.ToListAsync());
+            return View(await _context.Tracker.OrderByDescending(o => o.DateIn).ToListAsync());
         }
 
         // GET: Trackers/Details/5
@@ -143,10 +143,14 @@ namespace VirusTracker.Controllers
 
 
             //pass through the model.  https://docs.microsoft.com/en-us/aspnet/core/mvc/views/overview?view=aspnetcore-3.1
-            return View("LogoutTracker", tracker);
+            //  return View(nameof(LogoutTracker));
+            // return View(tracker);
+            //https://exceptionnotfound.net/asp-net-core-demystified-action-results/
 
-            //  return View();
+            //  return NoContent();
+            return RedirectToAction("Index"); //works
 
+            //     return RedirectToAction("LogoutTracker"); 
         }
 
         private void SaveCookies(Tracker tracker)
@@ -180,7 +184,7 @@ namespace VirusTracker.Controllers
 
 
         // GET: Trackers/LogoutTracker
-        [HttpGet()]
+        //  [HttpGet()]
         public IActionResult LogoutTracker()
         {
             //get the cookie
@@ -193,7 +197,7 @@ namespace VirusTracker.Controllers
             ViewData["cookiePhone"] = viewModel.Contrived.Phone;
             ViewData["cookiePlace"] = viewModel.Contrived.Place;
             ViewData["Id"] = viewModel.Contrived.Id;
-            return View();
+            return View("LogoutTracker");
         }
 
 

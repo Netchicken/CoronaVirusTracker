@@ -106,7 +106,8 @@ namespace VirusTracker
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
-            app.UseSession();
+            //https://docs.microsoft.com/en-us/aspnet/core/fundamentals/middleware/?view=aspnetcore-3.1
+
             app.UseHttpsRedirection();
             app.UseStaticFiles();
 
@@ -116,7 +117,7 @@ namespace VirusTracker
 
             app.UseAuthentication();
             app.UseAuthorization();
-
+            app.UseSession();
 
             //https://weblog.west-wind.com/posts/2020/Mar/13/Back-to-Basics-Rewriting-a-URL-in-ASPNET-Core
             /*app.Use(async (context, next) =>
